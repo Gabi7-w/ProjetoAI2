@@ -30,7 +30,7 @@ function LoginPage() {
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
       alert("Login realizado com sucesso.");
-      navigate("/");
+      navigate("/events");
       window.location.reload();
     } catch (error) {
       alert(error.response?.data?.message || "Erro ao iniciar sessão.");
@@ -38,10 +38,11 @@ function LoginPage() {
   };
 
   return (
-    <div className="d-flex justify-content-center">
-      <Card style={{ maxWidth: "500px", width: "100%" }}>
+    <div className="auth-wrap">
+      <Card className="auth-card">
         <Card.Body>
           <Card.Title>Iniciar sessão</Card.Title>
+          <p className="page-subtitle mb-4">Entra para criar eventos e gerir inscrições.</p>
 
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
@@ -55,7 +56,7 @@ function LoginPage() {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="mb-4">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -71,7 +72,7 @@ function LoginPage() {
             </Button>
           </Form>
 
-          <p className="mt-3 mb-0">
+          <p className="mt-3 mb-0 text-center">
             Ainda não tens conta? <Link to="/register">Criar conta</Link>
           </p>
         </Card.Body>

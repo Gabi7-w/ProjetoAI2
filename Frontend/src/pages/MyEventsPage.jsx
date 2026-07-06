@@ -7,6 +7,7 @@ function MyEventsPage() {
   const [events, setEvents] = useState([]);
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;
 
   const loadMyEvents = async () => {
     try {
@@ -18,10 +19,28 @@ function MyEventsPage() {
   };
 
   useEffect(() => {
-    if (user) {
-      loadMyEvents();
-    }
-  }, []);
+    if (!userId) return;
+
+    let ignore = false;
+
+    const fetchMyEvents = async () => {
+      try {
+        const response = await api.get("/events/my-created");
+
+        if (!ignore) {
+          setEvents(response.data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar os teus eventos:", error);
+      }
+    };
+
+    fetchMyEvents();
+
+    return () => {
+      ignore = true;
+    };
+  }, [userId]);
 
   const handleDelete = async (id) => {
     const confirmDelete = confirm(
@@ -49,63 +68,51 @@ function MyEventsPage() {
 
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <header className="page-header">
         <div>
           <h1>Os meus eventos</h1>
-          <p className="text-muted mb-0">
-            Gere os eventos que criaste.
-          </p>
+          <p>Gere os eventos que criaste.</p>
         </div>
 
         <Link to="/events/create" className="btn btn-primary">
           Criar evento
         </Link>
-      </div>
+      </header>
 
-      <Row>
+      <Row className="event-grid">
         {events.length === 0 && (
           <Col>
-            <p className="text-muted">
-              Ainda não criaste nenhum evento.
-            </p>
+            <div className="empty-state">Ainda não criaste nenhum evento.</div>
           </Col>
         )}
 
         {events.map((event) => (
-          <Col md={4} className="mb-4" key={event.id}>
-            <Card className="h-100">
+          <Col md={6} xl={4} key={event.id}>
+            <Card className="event-card">
               <Card.Body>
                 <div className="mb-2">
-                  {event.category && (
-                    <Badge bg="info">{event.category.name}</Badge>
-                  )}
+                  {event.category && <Badge bg="info">{event.category.name}</Badge>}
                 </div>
 
                 <Card.Title>{event.title}</Card.Title>
-
                 <Card.Text>{event.description}</Card.Text>
 
-                <p className="mb-1">
-                  <strong>Data:</strong>{" "}
-                  {new Date(event.date).toLocaleString("pt-PT")}
-                </p>
+                <div className="event-meta">
+                  <span>
+                    <strong>Data:</strong>{" "}
+                    {new Date(event.date).toLocaleString("pt-PT")}
+                  </span>
+                  <span>
+                    <strong>Local:</strong> {event.location}
+                  </span>
+                </div>
 
-                <p className="mb-1">
-                  <strong>Local:</strong> {event.location}
-                </p>
-
-                <div className="d-flex gap-2 mt-3 flex-wrap">
-                  <Link
-                    to={`/events/${event.id}`}
-                    className="btn btn-outline-primary btn-sm"
-                  >
+                <div className="card-actions">
+                  <Link to={`/events/${event.id}`} className="btn btn-outline-primary btn-sm">
                     Ver
                   </Link>
 
-                  <Link
-                    to={`/events/${event.id}/edit`}
-                    className="btn btn-warning btn-sm"
-                  >
+                  <Link to={`/events/${event.id}/edit`} className="btn btn-warning btn-sm">
                     Editar
                   </Link>
 

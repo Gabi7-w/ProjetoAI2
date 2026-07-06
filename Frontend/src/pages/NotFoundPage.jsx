@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 function NotFoundPage() {
   return (
-    <div className="text-center py-5">
+    <div className="empty-state">
       <h1>404</h1>
 
-      <p className="text-muted">
+      <p className="page-subtitle mx-auto mb-4">
         Esta página não existe.
       </p>
 
-      <Link to="/" className="btn btn-primary">
+      <Link to="/events" className="btn btn-primary">
         Voltar aos eventos
       </Link>
     </div>

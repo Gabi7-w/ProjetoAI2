@@ -11,15 +11,6 @@ function EventDetailsPage() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const loadEvent = async () => {
-    try {
-      const response = await api.get(`/events/${id}`);
-      setEvent(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar evento:", error);
-    }
-  };
-
   const loadParticipants = async () => {
     try {
       const response = await api.get(`/events/${id}/participants`);
@@ -30,8 +21,29 @@ function EventDetailsPage() {
   };
 
   useEffect(() => {
-    loadEvent();
-    loadParticipants();
+    let ignore = false;
+
+    const fetchDetails = async () => {
+      try {
+        const [eventResponse, participantsResponse] = await Promise.all([
+          api.get(`/events/${id}`),
+          api.get(`/events/${id}/participants`),
+        ]);
+
+        if (!ignore) {
+          setEvent(eventResponse.data);
+          setParticipants(participantsResponse.data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar evento:", error);
+      }
+    };
+
+    fetchDetails();
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   const isRegistered = user
@@ -66,65 +78,60 @@ function EventDetailsPage() {
   };
 
   if (!event) {
-    return <p>A carregar evento...</p>;
+    return <div className="empty-state">A carregar evento...</div>;
   }
 
   return (
     <>
-      <Link to="/" className="btn btn-outline-secondary mb-3">
+      <Link to="/events" className="btn btn-outline-secondary mb-3">
         Voltar
       </Link>
 
-      <Card className="mb-4">
+      <Card className="content-panel mb-4">
         <Card.Body>
-          <div className="mb-2">
-            {event.category && (
-              <Badge bg="info">{event.category.name}</Badge>
+          <div className="mb-3">
+            {event.category && <Badge bg="info">{event.category.name}</Badge>}
+          </div>
+
+          <h1 className="details-title">{event.title}</h1>
+          <p className="page-subtitle mb-4">{event.description}</p>
+
+          <div className="event-meta">
+            <span>
+              <strong>Data:</strong> {new Date(event.date).toLocaleString("pt-PT")}
+            </span>
+            <span>
+              <strong>Localização:</strong> {event.location}
+            </span>
+            <span>
+              <strong>Lotação:</strong> {event.capacity ? event.capacity : "Sem limite"}
+            </span>
+            {event.creator && (
+              <span>
+                <strong>Criado por:</strong> {event.creator.name}
+              </span>
+            )}
+            <span>
+              <strong>Participantes inscritos:</strong> {participants.length}
+            </span>
+          </div>
+
+          <div className="card-actions">
+            {!isCreator && !isRegistered && (
+              <Button variant="success" onClick={handleRegister}>
+                Inscrever-me
+              </Button>
+            )}
+
+            {!isCreator && isRegistered && (
+              <Button variant="outline-danger" onClick={handleCancelRegistration}>
+                Cancelar inscrição
+              </Button>
             )}
           </div>
 
-          <Card.Title as="h1">{event.title}</Card.Title>
-
-          <Card.Text>{event.description}</Card.Text>
-
-          <p className="mb-1">
-            <strong>Data:</strong>{" "}
-            {new Date(event.date).toLocaleString("pt-PT")}
-          </p>
-
-          <p className="mb-1">
-            <strong>Localização:</strong> {event.location}
-          </p>
-
-          <p className="mb-1">
-            <strong>Lotação:</strong>{" "}
-            {event.capacity ? event.capacity : "Sem limite"}
-          </p>
-
-          {event.creator && (
-            <p className="mb-3">
-              <strong>Criado por:</strong> {event.creator.name}
-            </p>
-          )}
-
-          <p className="mb-3">
-            <strong>Participantes inscritos:</strong> {participants.length}
-          </p>
-
-          {!isCreator && !isRegistered && (
-            <Button variant="success" onClick={handleRegister}>
-              Inscrever-me
-            </Button>
-          )}
-
-          {!isCreator && isRegistered && (
-            <Button variant="outline-danger" onClick={handleCancelRegistration}>
-              Cancelar inscrição
-            </Button>
-          )}
-
           {isCreator && (
-            <div className="alert alert-info mt-3 mb-0">
+            <div className="alert alert-info mt-4 mb-0">
               Este evento foi criado por ti. Podes geri-lo na página{" "}
               <Link to="/my-events">Os meus eventos</Link>.
             </div>
@@ -132,7 +139,7 @@ function EventDetailsPage() {
         </Card.Body>
       </Card>
 
-      <Card>
+      <Card className="content-panel">
         <Card.Body>
           <Card.Title>Participantes</Card.Title>
 
@@ -143,10 +150,11 @@ function EventDetailsPage() {
           )}
 
           {participants.length > 0 && (
-            <ListGroup>
+            <ListGroup className="participants-list mt-3">
               {participants.map((participant) => (
                 <ListGroup.Item key={participant.id}>
-                  {participant.name} — {participant.email}
+                  <strong>{participant.name}</strong>
+                  <span className="text-muted">{participant.email}</span>
                 </ListGroup.Item>
               ))}
             </ListGroup>

@@ -16,7 +16,25 @@ function CategoriesPage() {
   };
 
   useEffect(() => {
-    loadCategories();
+    let ignore = false;
+
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/categories");
+
+        if (!ignore) {
+          setCategories(response.data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar categorias:", error);
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -52,45 +70,55 @@ function CategoriesPage() {
 
   return (
     <>
-      <h1>Categorias</h1>
-      <p className="text-muted">
-        Gere as categorias dos eventos.
-      </p>
+      <header className="page-header">
+        <div>
+          <h1>Categorias</h1>
+          <p>Gere as categorias dos eventos.</p>
+        </div>
+      </header>
 
-      <Form onSubmit={handleSubmit} className="mb-4">
-        <Form.Group className="mb-3">
-          <Form.Label>Nome da categoria</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Ex.: Workshop"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </Form.Group>
+      <section className="form-panel mb-4">
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Nome da categoria</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Ex.: Workshop"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Form.Group>
 
-        <Button type="submit" variant="primary">
-          Criar categoria
-        </Button>
-      </Form>
+          <Button type="submit" variant="primary">
+            Criar categoria
+          </Button>
+        </Form>
+      </section>
 
-      <ListGroup>
-        {categories.map((category) => (
-          <ListGroup.Item
-            key={category.id}
-            className="d-flex justify-content-between align-items-center"
-          >
-            {category.name}
+      {categories.length === 0 && (
+        <div className="empty-state">Ainda não existem categorias.</div>
+      )}
 
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => handleDelete(category.id)}
+      {categories.length > 0 && (
+        <ListGroup>
+          {categories.map((category) => (
+            <ListGroup.Item
+              key={category.id}
+              className="d-flex justify-content-between align-items-center gap-3"
             >
-              Eliminar
-            </Button>
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
+              <strong>{category.name}</strong>
+
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => handleDelete(category.id)}
+              >
+                Eliminar
+              </Button>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      )}
     </>
   );
 }

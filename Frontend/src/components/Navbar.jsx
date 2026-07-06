@@ -15,17 +15,21 @@ function AppNavbar() {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar bg="dark" variant="dark" expand="lg" className="app-navbar">
       <Container>
-        <Navbar.Brand as={Link} to="/">
-          Gestão de Eventos
+        <Navbar.Brand as={Link} to="/" className="fw-bold">
+          Evently
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="main-navbar" />
 
         <Navbar.Collapse id="main-navbar">
-          <Nav className="ms-auto align-items-lg-center">
+          <Nav className="ms-auto align-items-lg-center gap-lg-1">
             <Nav.Link as={Link} to="/">
+              Início
+            </Nav.Link>
+
+            <Nav.Link as={Link} to="/events">
               Eventos
             </Nav.Link>
 
@@ -63,15 +67,11 @@ function AppNavbar() {
 
             {user && (
               <>
-                <span className="text-light ms-lg-3 me-lg-2">
+                <span className="navbar-user ms-lg-3 me-lg-2 mt-2 mt-lg-0">
                   Olá, {user.name}
                 </span>
 
-                <Button
-                  variant="outline-light"
-                  size="sm"
-                  onClick={handleLogout}
-                >
+                <Button variant="outline-light" size="sm" onClick={handleLogout}>
                   Sair
                 </Button>
               </>

@@ -30,40 +30,43 @@ function EditEventPage() {
     return localDate.toISOString().slice(0, 16);
   };
 
-  const loadCategories = async () => {
-    try {
-      const response = await api.get("/categories");
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
-    }
-  };
-
-  const loadEvent = async () => {
-    try {
-      const response = await api.get(`/events/${id}`);
-      const event = response.data;
-
-      setFormData({
-        title: event.title || "",
-        description: event.description || "",
-        date: formatDateTimeLocal(event.date),
-        location: event.location || "",
-        capacity: event.capacity || "",
-        categoryId: event.categoryId || "",
-      });
-    } catch (error) {
-      alert("Erro ao carregar evento.");
-      navigate("/my-events");
-    }
-  };
-
   useEffect(() => {
-    if (user) {
-      loadCategories();
-      loadEvent();
-    }
-  }, [id]);
+    if (!user) return;
+
+    let ignore = false;
+
+    const fetchEditData = async () => {
+      try {
+        const [categoriesResponse, eventResponse] = await Promise.all([
+          api.get("/categories"),
+          api.get(`/events/${id}`),
+        ]);
+
+        if (!ignore) {
+          const event = eventResponse.data;
+
+          setCategories(categoriesResponse.data);
+          setFormData({
+            title: event.title || "",
+            description: event.description || "",
+            date: formatDateTimeLocal(event.date),
+            location: event.location || "",
+            capacity: event.capacity || "",
+            categoryId: event.categoryId || "",
+          });
+        }
+      } catch {
+        alert("Erro ao carregar evento.");
+        navigate("/my-events");
+      }
+    };
+
+    fetchEditData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [id, navigate, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,84 +107,84 @@ function EditEventPage() {
         Voltar
       </Link>
 
-      <h1>Editar Evento</h1>
-      <p className="text-muted">
-        Atualiza os dados do evento.
-      </p>
+      <section className="form-panel">
+        <h1>Editar Evento</h1>
+        <p className="page-subtitle mb-4">Atualiza os dados do evento.</p>
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Título</Form.Label>
-          <Form.Control
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-          />
-        </Form.Group>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Título</Form.Label>
+            <Form.Control
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Descrição</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={4}
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Descrição</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={4}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Data e hora</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Data e hora</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Localização</Form.Label>
-          <Form.Control
-            type="text"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Localização</Form.Label>
+            <Form.Control
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Lotação</Form.Label>
-          <Form.Control
-            type="number"
-            name="capacity"
-            value={formData.capacity}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Lotação</Form.Label>
+            <Form.Control
+              type="number"
+              name="capacity"
+              value={formData.capacity}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Categoria</Form.Label>
-          <Form.Select
-            name="categoryId"
-            value={formData.categoryId}
-            onChange={handleChange}
-          >
-            <option value="">Seleciona uma categoria</option>
+          <Form.Group className="mb-4">
+            <Form.Label>Categoria</Form.Label>
+            <Form.Select
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+            >
+              <option value="">Seleciona uma categoria</option>
 
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
 
-        <Button type="submit" variant="primary">
-          Guardar alterações
-        </Button>
-      </Form>
+          <Button type="submit" variant="primary">
+            Guardar alterações
+          </Button>
+        </Form>
+      </section>
     </>
   );
 }

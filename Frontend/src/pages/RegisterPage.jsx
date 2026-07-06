@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card, Form } from "react-bootstrap";
+import { Alert, Button, Card, Form } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 
 import api from "../services/api";
@@ -60,13 +60,14 @@ function RegisterPage() {
   };
 
   return (
-    <div className="d-flex justify-content-center">
-      <Card style={{ maxWidth: "500px", width: "100%" }}>
+    <div className="auth-wrap">
+      <Card className="auth-card">
         <Card.Body>
           <Card.Title>Criar conta</Card.Title>
+          <p className="page-subtitle mb-4">Cria o teu acesso para participar na plataforma.</p>
 
-          <Message variant="danger">{error}</Message>
-          <Message variant="success">{success}</Message>
+          {error && <Alert variant="danger">{error}</Alert>}
+          {success && <Alert variant="success">{success}</Alert>}
 
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
@@ -93,7 +94,7 @@ function RegisterPage() {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="mb-4">
               <Form.Label>Password</Form.Label>
 
               <Form.Control
@@ -115,7 +116,7 @@ function RegisterPage() {
             </Button>
           </Form>
 
-          <p className="mt-3 mb-0">
+          <p className="mt-3 mb-0 text-center">
             Já tens conta? <Link to="/login">Inicia sessão</Link>
           </p>
         </Card.Body>
