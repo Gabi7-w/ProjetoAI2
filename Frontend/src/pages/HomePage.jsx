@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Badge, Button, Card, Col, Row } from "react-bootstrap";
-import heroImage from "../assets/hero-evently.png";
+import heroImage from "../assets/hero-evently-ui.png";
 
 function FeatureIcon({ type }) {
   const paths = {
